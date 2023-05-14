@@ -34,7 +34,9 @@ def get_exact_time(run):
                 else:
                     matches_decimals = re.findall(f'(?::| ){original_seconds}\.([0-9]+)', text)
                 if matches_decimals:
-                    match_decimals, = matches_decimals
+                    # let's assume that the first time in this format is the
+                    # actual time of the demo...
+                    match_decimals = matches_decimals[0]
                     decimals_txt = match_decimals
 
         decimals_dem = ''
