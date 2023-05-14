@@ -64,6 +64,13 @@ def get_map_demo_names():
         map_to_demo_names[mapname] = demoname if demoname else mapname
     return map_to_demo_names
 
+def extract_kill_count(line):
+    kill_count_match = re.search('\[([0-9]+)\]', line)
+    if kill_count_match:
+        kill_count = int(kill_count_match[1])
+        return line.replace(f'[{kill_count}]', ''), kill_count
+    return line, None
+
 def get_sda_run(run_data, category, demoname):
     date, name, time_string = run_data[:3]
     collapsed_time_string = time_string.replace(':', '')
@@ -85,9 +92,15 @@ def get_all_runs():
         for line in lines.splitlines():
             run_data_match = '\s\s+|\t|\+\+ '
             if line.startswith((' ', '\t')):
+                if kill_count:
+                    line, new_kill_count = extract_kill_count(line)
+                    if new_kill_count > kill_count:
+                        kill_count = new_kill_count
+                        runs_this_category[mapname] = []
                 run_data = re.split(run_data_match, line.strip())
                 runs_this_category[mapname].append(get_sda_run(run_data, category, map_to_demo_names[mapname]))
             else:
+                line, kill_count = extract_kill_count(line)
                 mapname, *run_data = re.split(run_data_match, line.strip())
                 runs_this_category[mapname] = [get_sda_run(run_data, category, map_to_demo_names[mapname])]
         runs[category] = runs_this_category
