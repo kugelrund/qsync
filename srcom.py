@@ -151,7 +151,7 @@ class SpeedrunDotComApi:
                 else:
                     # check if the potential user actually plays Quake
                     request = urllib.parse.urlencode({
-                        'user': user['id'], 'game': GAME_IDS[0], 'max': 200})
+                        'user': user['id'], 'game': GAME_IDS[0]})
                     with urllib.request.urlopen(urllib.request.Request(
                             cls.url + f'runs?{request}',
                             headers=USER_AGENT_HEADER)) as response:
