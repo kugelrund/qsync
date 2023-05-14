@@ -1,0 +1,3 @@
+[submodule "pydem"]
+	path = pydem
+	url = https://github.com/kugelrund/pydem.git
