@@ -92,6 +92,22 @@ class SpeedrunDotComApi:
     nickname_to_userid = dict()
 
     @classmethod
+    def get_collection(cls, request):
+        collection = []
+        while request:
+            with urllib.request.urlopen(request) as response:
+                response_json = json.load(response)
+            collection.extend(response_json['data'])
+            links_next = [link['uri'] for link in response_json['pagination']['links']
+                          if link['rel'] == 'next']
+            request = None
+            if links_next:
+                link_next, = links_next
+                request = urllib.request.Request(link_next,
+                                                 headers=USER_AGENT_HEADER)
+        return collection
+
+    @classmethod
     def get_user_name(cls, user_id):
         if user_id not in cls.users:
             with urllib.request.urlopen(urllib.request.Request(
@@ -119,10 +135,9 @@ class SpeedrunDotComApi:
     def get_runs(cls, level_category, level_name):
         category_name = category_abbreviation_to_name(level_category)
         level_id = cls.level_ids[map_abbreviation_to_name(level_name)]
-        with urllib.request.urlopen(urllib.request.Request(
-                cls.url + f'runs?level={level_id}&status=verified&max=200',
-                headers=USER_AGENT_HEADER)) as response:
-            runs_data = json.load(response)['data']
+        runs_data = cls.get_collection(urllib.request.Request(
+            cls.url + f'runs?level={level_id}&status=verified&max=200',
+            headers=USER_AGENT_HEADER))
         runs = []
         for run in runs_data:
             category_id = run['category']
@@ -137,10 +152,8 @@ class SpeedrunDotComApi:
     def get_user_id_from_nickname(cls, nicknames):
         for nickname in nicknames:
             request = urllib.parse.urlencode({'lookup': nickname, 'max': 200})
-            with urllib.request.urlopen(urllib.request.Request(
-                    cls.url + f'users?{request}',
-                    headers=USER_AGENT_HEADER)) as response:
-                users = json.load(response)['data']
+            users = cls.get_collection(urllib.request.Request(
+                cls.url + f'users?{request}', headers=USER_AGENT_HEADER))
             for user in users:
                 if user['names']['international'].casefold() != nickname.casefold():
                     continue
