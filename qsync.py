@@ -77,11 +77,10 @@ def main():
                     sda_nicknames_by_name[run_sda.name] = [run_sda.name]
 
                 sda_nicknames = sda_nicknames_by_name[run_sda.name]
-                run_srcom = [r for r in runs_srcom
-                             if is_same_run(r, run_sda, sda_nicknames)]
-                assert len(run_srcom) <= 1
+                fitting_runs_srcom = [r for r in runs_srcom
+                                      if is_same_run(r, run_sda, sda_nicknames)]
 
-                if not run_srcom:
+                if not fitting_runs_srcom:
                     user = srcom.SpeedrunDotComApi.get_user(sda_nicknames)
                     time = demo.get_exact_time(run_sda)
                     if time:
