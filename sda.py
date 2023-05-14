@@ -118,4 +118,5 @@ def get_sda_nicknames():
     nicknames['Conny Wernersson'].append('jukebox')
     nicknames['Jozsef Szalontai'].append('j0zzz')
     nicknames['Tony Hänninen'].append('kukkye')
+    nicknames['Grzegorz Gladowski'].append('deniu')
     return nicknames
