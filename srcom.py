@@ -120,13 +120,16 @@ class SpeedrunDotComApi:
         return cls.users[user_id]['names']['international']
 
     @classmethod
-    def get_run(cls, run):
-        assert len(run['players']) == 1
-        player = run['players'][0]
+    def get_player_name(cls, player):
         if player['rel'] == 'user':
-            name = cls.get_user_name(player['id'])
+            return cls.get_user_name(player['id'])
         else:
-            name = player['name']
+            return player['name']
+
+    @classmethod
+    def get_run(cls, run):
+        player, = run['players']
+        name = cls.get_player_name(player)
         date = None if not run['date'] else datetime.date.fromisoformat(run['date'])
         demo, video = get_srcom_demo_and_video(run)
         return Run(name, float(run['times']['primary_t']), date, demo, video)
