@@ -72,10 +72,13 @@ def extract_kill_count(line):
     return line, None
 
 def get_sda_run(run_data, category, demoname):
-    date, name, time_string = run_data[:3]
+    if len(run_data) > 3:
+        date, name, time_string, video = run_data
+    else:
+        date, name, time_string = run_data
+        video = ''
     collapsed_time_string = time_string.replace(':', '')
     demo = SDA_URL + f'demos/{category}/{demoname}_{collapsed_time_string}.dz'
-    video = run_data[3] if len(run_data) > 3 else ''
 
     minutes, seconds = time_string.split(':')
     time = datetime.timedelta(minutes=int(minutes),
