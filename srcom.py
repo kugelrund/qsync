@@ -64,31 +64,52 @@ class SpeedrunDotComApi:
     nickname_to_userid = dict()
 
     @classmethod
-    def get_collection(cls, request):
+    def request(cls, url, data=None, headers=dict()):
+        headers.update(USER_AGENT_HEADER)
+        request = urllib.request.Request(cls.url + url, data, headers)
+        delay = 1  # start with 1 second delay if too many requests
+        delay_increase_factor = 2
+        while True:
+            try:
+                return urllib.request.urlopen(request)
+            except urllib.error.HTTPError as e:
+                # speedrun.com returns 420 instead of 429 for "too many requests"
+                UNOFFICIAL_TOO_MANY_REQUESTS_STATUS_CODE = 420
+                if (e.status !=UNOFFICIAL_TOO_MANY_REQUESTS_STATUS_CODE):
+                    raise
+                time.sleep(delay)
+                delay *= delay_increase_factor
+
+    @classmethod
+    def request_json(cls, url):
+        with cls.request(url) as response:
+            return json.load(response)
+        
+    @classmethod
+    def request_data(cls, url):
+        return cls.request_json(url)['data']
+
+    @classmethod
+    def request_collection(cls, request):
         collection = []
         while request:
-            with urllib.request.urlopen(request) as response:
-                response_json = json.load(response)
+            response_json = cls.request_json(request)
             collection.extend(response_json['data'])
             links_next = [link['uri'] for link in response_json['pagination']['links']
                           if link['rel'] == 'next']
             request = None
             if links_next:
                 link_next, = links_next
-                request = urllib.request.Request(link_next,
-                                                 headers=USER_AGENT_HEADER)
+                request = link_next.replace(cls.url, '')
         return collection
 
     @classmethod
     def get_user_name(cls, user_id):
         if user_id not in cls.users:
-            with urllib.request.urlopen(urllib.request.Request(
-                    cls.url + f'users/{user_id}',
-                    headers=USER_AGENT_HEADER)) as response:
-                cls.users[user_id] = json.load(response)['data']
-                name = cls.users[user_id]['names']['international']
-                assert name not in cls.nickname_to_userid
-                cls.nickname_to_userid[name] = user_id
+            cls.users[user_id] = cls.request_data(f'users/{user_id}')
+            name = cls.users[user_id]['names']['international']
+            assert name not in cls.nickname_to_userid
+            cls.nickname_to_userid[name] = user_id
         return cls.users[user_id]['names']['international']
 
     @classmethod
@@ -109,10 +130,7 @@ class SpeedrunDotComApi:
     @classmethod
     def get_runs(cls, category_name, level_name):
         level_id = cls.level_ids[level_name]
-        runs_data = cls.get_collection(urllib.request.Request(
-            cls.url + f'runs?level={level_id}&status=verified&max=200',
-            headers=USER_AGENT_HEADER))
-        runs = []
+        runs_data = cls.request_collection(f'runs?level={level_id}&status=verified&max=200')
         for run in runs_data:
             category_id = run['category']
             if cls.category_names[category_id] == category_name:
@@ -126,8 +144,7 @@ class SpeedrunDotComApi:
     def get_user_id_from_nickname(cls, nicknames):
         for nickname in nicknames:
             request = urllib.parse.urlencode({'lookup': nickname, 'max': 200})
-            users = cls.get_collection(urllib.request.Request(
-                cls.url + f'users?{request}', headers=USER_AGENT_HEADER))
+            users = cls.request_collection(f'users?{request}')
             for user in users:
                 if user['names']['international'].casefold() != nickname.casefold():
                     continue
@@ -139,10 +156,7 @@ class SpeedrunDotComApi:
                     # check if the potential user actually plays Quake
                     request = urllib.parse.urlencode({
                         'user': user['id'], 'game': GAME_IDS[0]})
-                    with urllib.request.urlopen(urllib.request.Request(
-                            cls.url + f'runs?{request}',
-                            headers=USER_AGENT_HEADER)) as response:
-                        runs_data = json.load(response)['data']
+                    runs_data = cls.request_data(f'runs?{request}')
                     if runs_data:
                         cls.users[user['id']] = user
                         return user['id']
@@ -166,10 +180,7 @@ class SpeedrunDotComApi:
         if level_id not in cls.category_ids:
             cls.category_ids[level_id] = dict()
         if category_name not in cls.category_ids[level_id]:
-            with urllib.request.urlopen(urllib.request.Request(
-                    cls.url + f'levels/{level_id}/categories',
-                    headers=USER_AGENT_HEADER)) as response:
-                categories = json.load(response)['data']
+            categories = cls.request_data(f'levels/{level_id}/categories')
             for category in categories:
                 cls.category_ids[level_id][category['name']] = category['id']
         return cls.category_ids[level_id][category_name]
@@ -202,6 +213,4 @@ class SpeedrunDotComApi:
                   'Content-Length': len(data_as_bytes)}
         header.update(USER_AGENT_HEADER)
 
-        request =  urllib.request.Request(
-            'https://www.speedrun.com/api/v1/runs', data_as_bytes, header)
-        urllib.request.urlopen(request)
+        cls.request('runs', data_as_bytes, header)
