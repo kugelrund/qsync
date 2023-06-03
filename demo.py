@@ -32,7 +32,7 @@ def get_exact_time(run):
                     minutes, seconds = divmod(original_seconds, 60)
                     matches_decimals = re.findall(f' {minutes}:{seconds}\.([0-9]+)', text)
                 else:
-                    matches_decimals = re.findall(f'(?::| ){original_seconds}\.([0-9]+)', text)
+                    matches_decimals = re.findall(f'(?::| )?{original_seconds}\.([0-9]+)', text)
                 if matches_decimals:
                     # let's assume that the first time in this format is the
                     # actual time of the demo...
