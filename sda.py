@@ -135,4 +135,8 @@ def get_sda_nicknames():
     nicknames['Jozsef Szalontai'].append('j0zzz')
     nicknames['Tony Hänninen'].append('kukkye')
     nicknames['Grzegorz Gladowski'].append('deniu')
+    if 'Stuon' in nicknames:
+        nicknames['Stuon'].append('stuon011')
+    else:
+        nicknames['Stuon'] = ['stuon011']
     return nicknames
