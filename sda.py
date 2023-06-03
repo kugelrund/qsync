@@ -93,7 +93,7 @@ def get_all_runs():
     for category, lines in history.items():
         runs_this_category = dict()
         for line in lines.splitlines():
-            run_data_match = '\s\s+|\t|\+\+ '
+            run_data_match = '(?:\s\s+|\t)(?:\+\+ )?'
             if line.startswith((' ', '\t')):
                 if kill_count:
                     line, new_kill_count = extract_kill_count(line)
