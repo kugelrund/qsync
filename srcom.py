@@ -55,34 +55,6 @@ def get_srcom_demo_and_video(run):
                 demo = link
     return demo, video
 
-def category_abbreviation_to_name(abbreviation):
-    return {'ER': "Easy Run",
-            'EH': "Easy 100%",
-            'NR': "Nightmare Run",
-            'NH': "Nightmare 100%"}[abbreviation]
-
-def map_abbreviation_to_name(abbreviation):
-    if abbreviation == 'ep1':
-        return "All of Episode 1"
-    elif abbreviation == 'ep2':
-        return "All of Episode 2"
-    elif abbreviation == 'ep3':
-        return "All of Episode 3"
-    elif abbreviation == 'ep4':
-        return "All of Episode 4"
-    elif abbreviation == 'hip1':
-        return "All of Hip1"
-    elif abbreviation == 'hip2':
-        return "All of Hip2"
-    elif abbreviation == 'hip3':
-        return "All of Hip3"
-    elif abbreviation == 'doe1':
-        return "All of Rogue 1"
-    elif abbreviation == 'doe2':
-        return "All of Rogue 2"
-    else:
-        return abbreviation
-
 class SpeedrunDotComApi:
     url = SPEEDRUN_DOT_COM_API_URL
     users = dict()
@@ -135,9 +107,8 @@ class SpeedrunDotComApi:
         return Run(name, float(run['times']['primary_t']), date, demo, video)
 
     @classmethod
-    def get_runs(cls, level_category, level_name):
-        category_name = category_abbreviation_to_name(level_category)
-        level_id = cls.level_ids[map_abbreviation_to_name(level_name)]
+    def get_runs(cls, category_name, level_name):
+        level_id = cls.level_ids[level_name]
         runs_data = cls.get_collection(urllib.request.Request(
             cls.url + f'runs?level={level_id}&status=verified&max=200',
             headers=USER_AGENT_HEADER))
@@ -191,8 +162,7 @@ class SpeedrunDotComApi:
         return cls.users[user_id]
 
     @classmethod
-    def get_category_id(cls, level_category, level_id):
-        category_name = category_abbreviation_to_name(level_category)
+    def get_category_id(cls, category_name, level_id):
         if level_id not in cls.category_ids:
             cls.category_ids[level_id] = dict()
         if category_name not in cls.category_ids[level_id]:
@@ -205,9 +175,9 @@ class SpeedrunDotComApi:
         return cls.category_ids[level_id][category_name]
 
     @classmethod
-    def submit(cls, run, level_category, level_name, user, api_key):
-        level_id = cls.level_ids[map_abbreviation_to_name(level_name)]
-        category_id = cls.get_category_id(level_category, level_id)
+    def submit(cls, run, category_name, level_name, user, api_key):
+        level_id = cls.level_ids[level_name]
+        category_id = cls.get_category_id(category_name, level_id)
 
         data = json.dumps({"run": {
             "category": category_id,
