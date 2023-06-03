@@ -84,7 +84,7 @@ class SpeedrunDotComApi:
     def request_json(cls, url):
         with cls.request(url) as response:
             return json.load(response)
-        
+
     @classmethod
     def request_data(cls, url):
         return cls.request_json(url)['data']
@@ -128,16 +128,19 @@ class SpeedrunDotComApi:
         return Run(name, float(run['times']['primary_t']), date, demo, video)
 
     @classmethod
-    def get_runs(cls, category_name, level_name):
+    def get_runs(cls, level_name):
         level_id = cls.level_ids[level_name]
         runs_data = cls.request_collection(f'runs?level={level_id}&status=verified&max=200')
+        runs = dict()
         for run in runs_data:
             category_id = run['category']
-            if cls.category_names[category_id] == category_name:
-                runs.append(cls.get_run(run))
-                if level_id not in cls.category_ids:
-                    cls.category_ids[level_id] = dict()
-                cls.category_ids[level_id][category_name] = category_id
+            category_name = cls.category_names[category_id]
+            if category_name not in runs:
+                runs[category_name] = []
+            runs[category_name].append(cls.get_run(run))
+            if level_id not in cls.category_ids:
+                cls.category_ids[level_id] = dict()
+            cls.category_ids[level_id][category_name] = category_id
         return runs
 
     @classmethod

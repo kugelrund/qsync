@@ -41,10 +41,11 @@ def main():
     format_empty = '{:15}  {}'
     print(format_header.format('Map/Category', 'Player', 'Time', 'Date', 'speedrun.com user'))
     for level in maps:
+        runs_srcom_by_category = srcom.SpeedrunDotComApi.get_runs(level.to_srcom())
         if not args.categories:
             categories = [Category(c) for c in sda.get_categories_for_map(level.to_sda())]
         for category in categories:
-            runs_srcom = srcom.SpeedrunDotComApi.get_runs(category.to_srcom(), level.to_srcom())
+            runs_srcom = runs_srcom_by_category[category.to_srcom()]
             runs_sda = sda.get_runs(category.to_sda(), level.to_sda())
             if args.since:
                 since_date = datetime.date.fromisoformat(args.since)
