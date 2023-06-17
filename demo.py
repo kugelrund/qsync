@@ -6,10 +6,8 @@ import subprocess
 import tempfile
 import urllib.request
 
-import sys
-sys.path.append("pydem")
 import pydem
-import messages
+from pydem import messages
 
 
 def get_exact_time(run):
