@@ -53,6 +53,8 @@ def main():
 
             is_first_new_run = True
             for run_sda in runs_sda:
+                if run_sda.cheated:
+                    continue
                 if run_sda.name not in sda_nicknames_by_name:
                     sda_nicknames_by_name[run_sda.name] = [run_sda.name]
 

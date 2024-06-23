@@ -72,11 +72,16 @@ def extract_kill_count(line):
     return line, None
 
 def get_sda_run(run_data, category, demoname):
+    cheated = False
+    video = ''
     if len(run_data) > 3:
-        date, name, time_string, video = run_data
+        date, name, time_string, other = run_data
+        if other == '**':
+            cheated = True
+        else:
+            video = other
     else:
         date, name, time_string = run_data
-        video = ''
     collapsed_time_string = time_string.replace(':', '')
     demo = SDA_URL + f'demos/{category}/{demoname}_{collapsed_time_string}.dz'
 
@@ -84,7 +89,7 @@ def get_sda_run(run_data, category, demoname):
     time = datetime.timedelta(minutes=int(minutes),
                               seconds=int(seconds)).total_seconds()
     date = datetime.datetime.strptime(date, '%d.%m.%y').date()
-    return Run(name, time, date, demo, video)
+    return Run(name, time, date, demo, video, cheated)
 
 def get_all_runs():
     history = get_history()

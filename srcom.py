@@ -125,7 +125,8 @@ class SpeedrunDotComApi:
         name = cls.get_player_name(player)
         date = None if not run['date'] else datetime.date.fromisoformat(run['date'])
         demo, video = get_srcom_demo_and_video(run)
-        return Run(name, float(run['times']['primary_t']), date, demo, video)
+        cheated = False
+        return Run(name, float(run['times']['primary_t']), date, demo, video, cheated)
 
     @classmethod
     def get_runs(cls, level_name):

@@ -9,3 +9,4 @@ class Run:
     date: datetime.date
     demo: str
     video: str
+    cheated: bool
