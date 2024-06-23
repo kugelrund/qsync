@@ -45,6 +45,8 @@ def main():
         if not args.categories:
             categories = [Category(c) for c in sda.get_categories_for_map(level.to_sda())]
         for category in categories:
+            if category.to_srcom() not in runs_srcom_by_category:
+                continue
             runs_srcom = runs_srcom_by_category[category.to_srcom()]
             runs_sda = sda.get_runs(category.to_sda(), level.to_sda())
             if args.since:
