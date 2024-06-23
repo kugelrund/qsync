@@ -139,4 +139,8 @@ def get_sda_nicknames():
         nicknames['Stuon'].append('stuon011')
     else:
         nicknames['Stuon'] = ['stuon011']
+    if 'EIM' in nicknames:
+        nicknames['EIM'].append('eim64')
+    else:
+        nicknames['EIM'] = ['eim64']
     return nicknames
