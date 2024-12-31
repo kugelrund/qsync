@@ -46,7 +46,7 @@ def get_srcom_demo_and_video(run):
     demo = ''
     video = ''
     for l in links:
-        link = re.match('https?://[^\s]+', l)
+        link = re.match(r'https?://[^\s]+', l)
         if link:
             link = link[0]
             if 'youtu' in link or 'twitch' in link:

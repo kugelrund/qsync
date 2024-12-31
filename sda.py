@@ -13,12 +13,12 @@ def get_history():
         content = response.read().decode('cp1252')
 
     prelude, history_ER, history_EH, history_NR, history_NH, history_Marathon, runs_coop = re.split(
-        '\*\*\*\* Easy runs \*\*\*\*|'
-        '\*\*\*\* Easy 100% \*\*\*\*|'
-        '\*\*\*\* Nightmare runs \*\*\*\*|'
-        '\*\*\*\* Nightmare 100% \*\*\*\*|'
-        '\*\*\*\* Marathon \*\*\*\*|'
-        '\*\*\*\* Coop \*\*\*\*', content)
+        r'\*\*\*\* Easy runs \*\*\*\*|'
+        r'\*\*\*\* Easy 100% \*\*\*\*|'
+        r'\*\*\*\* Nightmare runs \*\*\*\*|'
+        r'\*\*\*\* Nightmare 100% \*\*\*\*|'
+        r'\*\*\*\* Marathon \*\*\*\*|'
+        r'\*\*\*\* Coop \*\*\*\*', content)
 
     history = dict()
     history['ER'] = history_ER.strip() + '\n'
@@ -53,7 +53,7 @@ def get_map_demo_names():
     config_url = SDA_URL + 'config'
     with urllib.request.urlopen(config_url) as response:
         content = response.read().decode('cp1252')
-    _, content_levels, _ = re.split('\[levels\]|\[tables\]', content)
+    _, content_levels, _ = re.split(r'\[levels\]|\[tables\]', content)
     # remove comments and empty lines
     content_levels = re.sub('#.*', '', content_levels).strip()
 
@@ -65,7 +65,7 @@ def get_map_demo_names():
     return map_to_demo_names
 
 def extract_kill_count(line):
-    kill_count_match = re.search('\[([0-9]+)\]', line)
+    kill_count_match = re.search(r'\[([0-9]+)\]', line)
     if kill_count_match:
         kill_count = int(kill_count_match[1])
         return line.replace(f'[{kill_count}]', ''), kill_count
@@ -98,7 +98,7 @@ def get_all_runs():
     for category, lines in history.items():
         runs_this_category = dict()
         for line in lines.splitlines():
-            run_data_match = '(?:\s\s+|\t)(?:\+\+ )?'
+            run_data_match = r'(?:\s\s+|\t)(?:\+\+ )?'
             if line.startswith((' ', '\t')):
                 if kill_count:
                     line, new_kill_count = extract_kill_count(line)
@@ -118,7 +118,7 @@ class SDA:
     runs = get_all_runs()
 
 def get_categories_for_map(map):
-    return [category for category in SDA.runs if map in SDA.runs[category]] 
+    return [category for category in SDA.runs if map in SDA.runs[category]]
 
 def get_runs(category, map):
     return SDA.runs[category][map]
@@ -127,7 +127,7 @@ def get_sda_nicknames():
     config_url = SDA_URL + 'config'
     with urllib.request.urlopen(config_url) as response:
         content = response.read().decode('cp1252')
-    _, content_players, _ = re.split('\[players\]|\[levels\]', content)
+    _, content_players, _ = re.split(r'\[players\]|\[levels\]', content)
     # remove comments and empty lines
     content_players = re.sub('#.*', '', content_players).strip()
 
